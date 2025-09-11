@@ -4,6 +4,6 @@ namespace HamzaHassanM\LaravelSocialAutoPost\Contracts;
 
 interface ShareVideoPostInterface {
 
-    public function shareVideo($caption, $video_url);
+    public function shareVideo(string $caption, string $video_url): array;
 
 }

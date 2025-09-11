@@ -1,7 +1,8 @@
 {
     "name": "hamzahassanm/laravel-social-auto-post",
-    "description": "Laravel social media auto post package",
+    "description": "Laravel social media auto post package - Complete solution for posting to 8 major social media platforms",
     "type": "library",
+    "version": "2.0.0",
     "require": {
         "laravel/framework": "^11.0"
     },
@@ -36,7 +37,14 @@
             ],
             "aliases": {
                 "FaceBook": "HamzaHassanM\\LaravelSocialAutoPost\\Facades\\FaceBook",
-                "Telegram": "HamzaHassanM\\LaravelSocialAutoPost\\Facades\\Telegram"
+                "Telegram": "HamzaHassanM\\LaravelSocialAutoPost\\Facades\\Telegram",
+                "Twitter": "HamzaHassanM\\LaravelSocialAutoPost\\Facades\\Twitter",
+                "LinkedIn": "HamzaHassanM\\LaravelSocialAutoPost\\Facades\\LinkedIn",
+                "Instagram": "HamzaHassanM\\LaravelSocialAutoPost\\Facades\\Instagram",
+                "TikTok": "HamzaHassanM\\LaravelSocialAutoPost\\Facades\\TikTok",
+                "YouTube": "HamzaHassanM\\LaravelSocialAutoPost\\Facades\\YouTube",
+                "Pinterest": "HamzaHassanM\\LaravelSocialAutoPost\\Facades\\Pinterest",
+                "SocialMedia": "HamzaHassanM\\LaravelSocialAutoPost\\Facades\\SocialMedia"
             }
         }
     },

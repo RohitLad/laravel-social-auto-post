@@ -4,6 +4,6 @@ namespace HamzaHassanM\LaravelSocialAutoPost\Contracts;
 
 interface ShareInterface {
 
-    public function share($caption, $url);
+    public function share(string $caption, string $url): array;
 
 }

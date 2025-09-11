@@ -6,6 +6,8 @@ use HamzaHassanM\LaravelSocialAutoPost\Contracts\ShareDocumentPostInterface;
 use HamzaHassanM\LaravelSocialAutoPost\Contracts\ShareImagePostInterface;
 use HamzaHassanM\LaravelSocialAutoPost\Contracts\ShareInterface;
 use HamzaHassanM\LaravelSocialAutoPost\Contracts\ShareVideoPostInterface;
+use HamzaHassanM\LaravelSocialAutoPost\Exceptions\SocialMediaException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class TelegramService
@@ -62,17 +64,29 @@ class TelegramService extends SocialMediaService implements ShareInterface,
      * @param string $caption The caption to accompany the post.
      * @param string $url The URL to share.
      *
-     * @return mixed Response from the Telegram API.
+     * @return array Response from the Telegram API.
+     * @throws SocialMediaException
      */
-    public function share($caption, $url) {
-        $sendMessageUrl = $this->buildApiUrl('sendMessage');
-        $params = [
-            'chat_id'    => $this->chat_id,
-            'text'       => $caption . "\n" . $url,
-            'parse_mode' => 'Markdown',
-        ];
+    public function share(string $caption, string $url): array
+    {
+        $this->validateText($caption, 4096);
+        $this->validateUrl($url);
+        
+        try {
+            $sendMessageUrl = $this->buildApiUrl('sendMessage');
+            $params = [
+                'chat_id'    => $this->chat_id,
+                'text'       => $caption . "\n" . $url,
+                'parse_mode' => 'Markdown',
+            ];
 
-        return $this->sendRequest($sendMessageUrl, 'post', $params);
+            $response = $this->sendRequest($sendMessageUrl, 'post', $params);
+            Log::info('Telegram message sent successfully', ['message_id' => $response['result']['message_id'] ?? null]);
+            return $response;
+        } catch (\Exception $e) {
+            Log::error('Failed to send Telegram message', ['error' => $e->getMessage()]);
+            throw new SocialMediaException('Failed to send Telegram message: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -84,7 +98,7 @@ class TelegramService extends SocialMediaService implements ShareInterface,
      * @return mixed Response from the Telegram API.
      */
 
-    public function shareImage($caption, $image_url): mixed {
+    public function shareImage(string $caption, string $image_url): array {
         $sendPhotoUrl = $this->buildApiUrl('sendPhoto');
         $params = [
             'chat_id'    => $this->chat_id,
@@ -104,7 +118,7 @@ class TelegramService extends SocialMediaService implements ShareInterface,
      *
      * @return mixed Response from the Telegram API.
      */
-    public function shareDocument($caption, $document_url) {
+    public function shareDocument(string $caption, string $document_url): array {
         $sendDocumentUrl = $this->buildApiUrl('sendDocument');
         $params = [
             'chat_id'    => $this->chat_id,
@@ -124,7 +138,7 @@ class TelegramService extends SocialMediaService implements ShareInterface,
      *
      * @return mixed Response from the Telegram API.
      */
-    public function shareVideo($caption, $video_url) {
+    public function shareVideo(string $caption, string $video_url): array {
         $sendVideoUrl = $this->buildApiUrl('sendVideo');
         $params = [
             'chat_id'    => $this->chat_id,

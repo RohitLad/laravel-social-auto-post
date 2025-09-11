@@ -5,6 +5,8 @@ namespace HamzaHassanM\LaravelSocialAutoPost\Services;
 use HamzaHassanM\LaravelSocialAutoPost\Contracts\ShareImagePostInterface;
 use HamzaHassanM\LaravelSocialAutoPost\Contracts\ShareInterface;
 use HamzaHassanM\LaravelSocialAutoPost\Contracts\ShareVideoPostInterface;
+use HamzaHassanM\LaravelSocialAutoPost\Exceptions\SocialMediaException;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class FacebookService
@@ -64,16 +66,28 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
      * @param string $caption The caption to accompany the image.
      * @param string $image_url The URL of the image.
      *
-     * @return mixed Response from the Facebook API.
+     * @return array Response from the Facebook API.
+     * @throws SocialMediaException
      */
-    public function shareImage($caption, $image_url) {
-        $url = $this->buildApiUrl('photos');
-        $params = $this->buildParams([
-            'url'     => $image_url,
-            'caption' => $caption,
-        ]);
+    public function shareImage(string $caption, string $image_url): array
+    {
+        $this->validateText($caption, 2000);
+        $this->validateUrl($image_url);
+        
+        try {
+            $url = $this->buildApiUrl('photos');
+            $params = $this->buildParams([
+                'url'     => $image_url,
+                'caption' => $caption,
+            ]);
 
-        return $this->sendRequest($url, 'post', $params);
+            $response = $this->sendRequest($url, 'post', $params);
+            Log::info('Facebook image post shared successfully', ['post_id' => $response['id'] ?? null]);
+            return $response;
+        } catch (\Exception $e) {
+            Log::error('Failed to share image to Facebook', ['error' => $e->getMessage()]);
+            throw new SocialMediaException('Failed to share image to Facebook: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -82,17 +96,28 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
      * @param string $caption The caption to accompany the post.
      * @param string $url The URL to share.
      *
-     * @return mixed Response from the Facebook API.
+     * @return array Response from the Facebook API.
+     * @throws SocialMediaException
      */
+    public function share(string $caption, string $url): array
+    {
+        $this->validateText($caption, 2000);
+        $this->validateUrl($url);
+        
+        try {
+            $feedUrl = $this->buildApiUrl('feed');
+            $params = $this->buildParams([
+                'message' => $caption,
+                'link'    => $url,
+            ]);
 
-    public function share($caption, $url) {
-        $feedUrl = $this->buildApiUrl('feed');
-        $params = $this->buildParams([
-            'message' => $caption,
-            'link'    => $url,
-        ]);
-
-        return $this->sendRequest($feedUrl, 'post', $params);
+            $response = $this->sendRequest($feedUrl, 'post', $params);
+            Log::info('Facebook post shared successfully', ['post_id' => $response['id'] ?? null]);
+            return $response;
+        } catch (\Exception $e) {
+            Log::error('Failed to share to Facebook', ['error' => $e->getMessage()]);
+            throw new SocialMediaException('Failed to share to Facebook: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -103,7 +128,7 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
      *
      * @return mixed Response from the Facebook API.
      */
-    public function shareVideo( $caption,  $video_url) {
+    public function shareVideo(string $caption, string $video_url): array {
         // Step 1: Check if the video URL is remote and download the file if necessary
         $video_path = $this->downloadIfRemote($video_url);
 
