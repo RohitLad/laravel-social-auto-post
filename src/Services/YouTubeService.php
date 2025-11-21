@@ -45,34 +45,21 @@ class YouTubeService extends SocialMediaService implements ShareInterface, Share
     /**
      * Private constructor to prevent direct instantiation.
      */
-    private function __construct(
-        string $apiKey,
-        string $accessToken,
-        string $channelId
-    ) {
-        $this->api_key = $apiKey;
-        $this->access_token = $accessToken;
-        $this->channel_id = $channelId;
+    private function __construct() {
     }
 
-    /**
-     * Get the singleton instance of YouTubeService.
-     */
-    public static function getInstance(): YouTubeService
-    {
-        if (self::$instance === null) {
-            $apiKey = config('autopost.youtube_api_key');
-            $accessToken = config('autopost.youtube_access_token');
-            $channelId = config('autopost.youtube_channel_id');
+    public function withCredentials(string $apiKey,
+    string $accessToken,
+    string $channelId): static
+{
+    $clone = clone $this;
+    $clone->api_key = $apiKey;
+    $clone->access_token = $accessToken;
+    $clone->channel_id = $channelId;
 
-            if (!$apiKey || !$accessToken || !$channelId) {
-                throw new SocialMediaException('YouTube credentials are not properly configured.');
-            }
+    return $clone;
+}
 
-            self::$instance = new self($apiKey, $accessToken, $channelId);
-        }
-        return self::$instance;
-    }
 
     /**
      * Share a text post with a URL to YouTube.

@@ -45,34 +45,23 @@ class LinkedInService extends SocialMediaService implements ShareInterface, Shar
     /**
      * Private constructor to prevent direct instantiation.
      */
-    private function __construct(
+    private function __construct() {
+    }
+
+    public function withCredentials(
         string $accessToken,
         string $personUrn,
         string $organizationUrn = null
-    ) {
-        $this->access_token = $accessToken;
-        $this->person_urn = $personUrn;
-        $this->organization_urn = $organizationUrn;
-    }
+    ): static
+{
+    $clone = clone $this;
+    $clone->access_token = $accessToken;
+    $clone->person_urn = $personUrn;
+    $clone->organization_urn = $organizationUrn;
 
-    /**
-     * Get the singleton instance of LinkedInService.
-     */
-    public static function getInstance(): LinkedInService
-    {
-        if (self::$instance === null) {
-            $accessToken = config('autopost.linkedin_access_token');
-            $personUrn = config('autopost.linkedin_person_urn');
-            $organizationUrn = config('autopost.linkedin_organization_urn');
+    return $clone;
+}
 
-            if (!$accessToken || !$personUrn) {
-                throw new SocialMediaException('LinkedIn credentials are not properly configured.');
-            }
-
-            self::$instance = new self($accessToken, $personUrn, $organizationUrn);
-        }
-        return self::$instance;
-    }
 
     /**
      * Share a text post with a URL to LinkedIn.

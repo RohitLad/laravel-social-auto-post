@@ -23,39 +23,39 @@ class SocialShareServiceProvider extends ServiceProvider {
 
     public function register() {
         // Register all social media services as singletons
-        $this->app->singleton(FacebookService::class, function ($app) {
-            return FacebookService::getInstance();
+        $this->app->bind(FacebookService::class, function ($app) {
+            return new FacebookService();
         });
 
-        $this->app->singleton(TelegramService::class, function ($app) {
-            return TelegramService::getInstance();
+        $this->app->bind(TelegramService::class, function ($app) {
+            return new TelegramService();
         });
 
-        $this->app->singleton(TwitterService::class, function ($app) {
-            return TwitterService::getInstance();
+        $this->app->bind(TwitterService::class, function ($app) {
+            return new TwitterService();
         });
 
-        $this->app->singleton(LinkedInService::class, function ($app) {
-            return LinkedInService::getInstance();
+        $this->app->bind(LinkedInService::class, function ($app) {
+            return new LinkedInService();
         });
 
-        $this->app->singleton(InstagramService::class, function ($app) {
-            return InstagramService::getInstance();
+        $this->app->bind(InstagramService::class, function ($app) {
+            return new InstagramService();
         });
 
-        $this->app->singleton(TikTokService::class, function ($app) {
-            return TikTokService::getInstance();
+        $this->app->bind(TikTokService::class, function ($app) {
+            return new TikTokService();
         });
 
-        $this->app->singleton(YouTubeService::class, function ($app) {
-            return YouTubeService::getInstance();
+        $this->app->bind(YouTubeService::class, function ($app) {
+            return new YouTubeService();
         });
 
-        $this->app->singleton(PinterestService::class, function ($app) {
-            return PinterestService::getInstance();
+        $this->app->bind(PinterestService::class, function ($app) {
+            return new PinterestService();
         });
 
-        $this->app->singleton(SocialMediaManager::class, function ($app) {
+        $this->app->bind(SocialMediaManager::class, function ($app) {
             return new SocialMediaManager();
         });
 

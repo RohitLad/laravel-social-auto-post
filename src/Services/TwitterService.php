@@ -55,40 +55,27 @@ class TwitterService extends SocialMediaService implements ShareInterface, Share
     /**
      * Private constructor to prevent direct instantiation.
      */
-    private function __construct(
+    private function __construct() {
+    }
+
+    public function withCredentials(
         string $bearerToken,
         string $apiKey,
         string $apiSecret,
         string $accessToken,
         string $accessTokenSecret
-    ) {
-        $this->bearer_token = $bearerToken;
-        $this->api_key = $apiKey;
-        $this->api_secret = $apiSecret;
-        $this->access_token = $accessToken;
-        $this->access_token_secret = $accessTokenSecret;
-    }
+    ): static
+{
+    $clone = clone $this;
+    $clone->bearer_token = $bearerToken;
+    $clone->api_key = $apiKey;
+    $clone->api_secret = $apiSecret;
+    $clone->access_token = $accessToken;
+    $clone->access_token_secret = $accessTokenSecret;
 
-    /**
-     * Get the singleton instance of TwitterService.
-     */
-    public static function getInstance(): TwitterService
-    {
-        if (self::$instance === null) {
-            $bearerToken = config('autopost.twitter_bearer_token');
-            $apiKey = config('autopost.twitter_api_key');
-            $apiSecret = config('autopost.twitter_api_secret');
-            $accessToken = config('autopost.twitter_access_token');
-            $accessTokenSecret = config('autopost.twitter_access_token_secret');
+    return $clone;
+}
 
-            if (!$bearerToken || !$apiKey || !$apiSecret || !$accessToken || !$accessTokenSecret) {
-                throw new SocialMediaException('Twitter credentials are not properly configured.');
-            }
-
-            self::$instance = new self($bearerToken, $apiKey, $apiSecret, $accessToken, $accessTokenSecret);
-        }
-        return self::$instance;
-    }
 
     /**
      * Share a text post with a URL to Twitter.

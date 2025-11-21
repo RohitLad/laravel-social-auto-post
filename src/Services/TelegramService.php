@@ -39,24 +39,17 @@ class TelegramService extends SocialMediaService implements ShareInterface,
      * Private constructor to prevent direct instantiation.
      */
 
-    private function __construct(string $telegram_bot_token, string $chat_id) {
-        $this->telegram_bot_token = $telegram_bot_token;
-        $this->chat_id = $chat_id;
+    private function __construct() {
     }
 
-    /**
-     * Get the singleton instance of TelegramService.
-     *
-     * @return TelegramService
-     */
-    public static function getInstance(): TelegramService {
-        if (self::$instance === null) {
-            $telegramBotToken = config('autopost.telegram_bot_token');
-            $chatId = config('autopost.telegram_chat_id');
-            self::$instance = new self($telegramBotToken, $chatId);
-        }
-        return self::$instance;
-    }
+    public function withCredentials(string $telegram_bot_token, string $chat_id): static
+{
+    $clone = clone $this;
+    $clone->telegram_bot_token = $telegram_bot_token;
+    $clone->chat_id = $chat_id;
+
+    return $clone;
+}
 
     /**
      * Share a text post with a caption and a URL.

@@ -15,8 +15,8 @@ use Illuminate\Support\Facades\Log;
  *
  * Implements sharing of general posts, images, and videos to a Facebook page.
  */
-class FacebookService extends SocialMediaService implements ShareInterface, ShareImagePostInterface, ShareVideoPostInterface {
-
+class FacebookService extends SocialMediaService implements ShareInterface, ShareImagePostInterface, ShareVideoPostInterface
+{
     /**
      * @var string Facebook access token
      */
@@ -28,10 +28,6 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
     private $page_id;
 
     /**
-     * @var FacebookService|null Singleton instance
-     */
-    private static ?FacebookService $instance = null;
-    /**
      * Facebook API version
      */
     private const API_VERSION = 'v20.0';
@@ -41,23 +37,17 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
      * Private constructor to prevent direct instantiation.
      */
 
-    private function __construct(string $accessToken, string $pageId) {
-        $this->access_token = $accessToken;
-        $this->page_id = $pageId;
+    public function __construct()
+    {
     }
 
-    /**
-     * Get the singleton instance of FacebookService.
-     *
-     * @return FacebookService
-     */
-    public static function getInstance() {
-        if (self::$instance === null) {
-            $accessToken = config('autopost.facebook_access_token');
-            $pageId = config('autopost.facebook_page_id');
-            self::$instance = new self($accessToken, $pageId);
-        }
-        return self::$instance;
+    public function withCredentials(string $accessToken, string $pageId): static
+    {
+        $clone = clone $this;
+        $clone->access_token = $accessToken;
+        $clone->page_id = $pageId;
+
+        return $clone;
     }
 
     /**
@@ -73,11 +63,11 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
     {
         $this->validateText($caption, 2000);
         $this->validateUrl($image_url);
-        
+
         try {
             $url = $this->buildApiUrl('photos');
             $params = $this->buildParams([
-                'url'     => $image_url,
+                'url' => $image_url,
                 'caption' => $caption,
             ]);
 
@@ -103,12 +93,12 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
     {
         $this->validateText($caption, 2000);
         $this->validateUrl($url);
-        
+
         try {
             $feedUrl = $this->buildApiUrl('feed');
             $params = $this->buildParams([
                 'message' => $caption,
-                'link'    => $url,
+                'link' => $url,
             ]);
 
             $response = $this->sendRequest($feedUrl, 'post', $params);
@@ -128,7 +118,8 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
      *
      * @return mixed Response from the Facebook API.
      */
-    public function shareVideo(string $caption, string $video_url): array {
+    public function shareVideo(string $caption, string $video_url): array
+    {
         // Step 1: Check if the video URL is remote and download the file if necessary
         $video_path = $this->downloadIfRemote($video_url);
 
@@ -143,7 +134,7 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
         $startUrl = $this->buildApiUrl('videos');
         $params = $this->buildParams([
             'upload_phase' => 'start',
-            'file_size'    => $fileSize, // Total size of the video file
+            'file_size' => $fileSize, // Total size of the video file
         ]);
 
         $response = $this->sendRequest($startUrl, 'post', $params);
@@ -167,10 +158,10 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
 
             // Transfer phase - upload the chunk
             $params = $this->buildParams([
-                'upload_phase'      => 'transfer',
+                'upload_phase' => 'transfer',
                 'upload_session_id' => $uploadSessionId,
-                'start_offset'      => $startOffset,
-                'video_file_chunk'  => new \CURLFile($chunkPath) // Pass the chunk as a CURLFile
+                'start_offset' => $startOffset,
+                'video_file_chunk' => new \CURLFile($chunkPath) // Pass the chunk as a CURLFile
             ]);
 
             $transferResponse = $this->sendRequest($startUrl, 'post', $params);
@@ -189,7 +180,8 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
      *
      * @return string Local file path of the video (either the original path or downloaded file).
      */
-    private function downloadIfRemote(string $video_url): string {
+    private function downloadIfRemote(string $video_url): string
+    {
         // Check if the URL is a remote URL
         if (filter_var($video_url, FILTER_VALIDATE_URL)) {
             // Download the remote file and save it locally
@@ -211,7 +203,8 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
      *
      * @return string The path to the saved chunk file.
      */
-    private function saveVideoChunk(string $video_path, int $start_offset, int $end_offset): string {
+    private function saveVideoChunk(string $video_path, int $start_offset, int $end_offset): string
+    {
         $chunkPath = sys_get_temp_dir() . '/' . uniqid('video_chunk_') . '.mp4';
 
         $handle = fopen($video_path, 'rb');
@@ -233,14 +226,15 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
      *
      * @return mixed Response from the Facebook API.
      */
-    private function completeVideoUpload(string $uploadSessionId, string $caption) {
+    private function completeVideoUpload(string $uploadSessionId, string $caption)
+    {
         $completeUrl = $this->buildApiUrl('videos');
         $params = $this->buildParams([
-            'upload_phase'      => 'finish',
+            'upload_phase' => 'finish',
             'upload_session_id' => $uploadSessionId,
-            'description'       => $caption,
-            'title'             => $caption,
-            'published'         => true,
+            'description' => $caption,
+            'title' => $caption,
+            'published' => true,
         ]);
 
         return $this->sendRequest($completeUrl, 'post', $params);
@@ -253,7 +247,8 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
      *
      * @return mixed Response from the Facebook API.
      */
-    public function getPageInsights(array $metrics = [], array $additionalParams = []): array {
+    public function getPageInsights(array $metrics = [], array $additionalParams = []): array
+    {
         $url = $this->buildApiUrl('insights');
         $params = $this->buildParams(array_merge([
             'metric' => implode(',', $metrics),
@@ -268,7 +263,8 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
      *
      * @return mixed Response from the Facebook API.
      */
-    public function getPageInfo() {
+    public function getPageInfo()
+    {
         $url = $this->buildApiUrl();
         $params = $this->buildParams();
 
@@ -283,8 +279,9 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
      *
      * @return string
      */
-    private function buildApiUrl(string $endpoint = ''): string {
-        $apiVersion = config('autopost.facebook_api_version');
+    private function buildApiUrl(string $endpoint = ''): string
+    {
+        $apiVersion = self::API_VERSION;
         return 'https://graph.facebook.com/' . $apiVersion . '/' . $this->page_id . '/' . $endpoint;
     }
 
@@ -295,7 +292,8 @@ class FacebookService extends SocialMediaService implements ShareInterface, Shar
      *
      * @return array
      */
-    private function buildParams(array $params = []): array {
+    private function buildParams(array $params = []): array
+    {
         return array_merge($params, ['access_token' => $this->access_token]);
     }
 }

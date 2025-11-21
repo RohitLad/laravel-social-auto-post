@@ -40,31 +40,21 @@ class PinterestService extends SocialMediaService implements ShareInterface, Sha
     /**
      * Private constructor to prevent direct instantiation.
      */
-    private function __construct(
+    private function __construct() {
+    }
+
+    public function withCredentials(
         string $accessToken,
         string $boardId
-    ) {
-        $this->access_token = $accessToken;
-        $this->board_id = $boardId;
-    }
+    ): static
+{
+    $clone = clone $this;
+    $clone->access_token = $accessToken;
+    $clone->board_id = $boardId;
 
-    /**
-     * Get the singleton instance of PinterestService.
-     */
-    public static function getInstance(): PinterestService
-    {
-        if (self::$instance === null) {
-            $accessToken = config('autopost.pinterest_access_token');
-            $boardId = config('autopost.pinterest_board_id');
+    return $clone;
+}
 
-            if (!$accessToken || !$boardId) {
-                throw new SocialMediaException('Pinterest credentials are not properly configured.');
-            }
-
-            self::$instance = new self($accessToken, $boardId);
-        }
-        return self::$instance;
-    }
 
     /**
      * Share a text post with a URL to Pinterest.

@@ -33,11 +33,6 @@ class InstagramService extends SocialMediaService implements ShareInterface, Sha
     private $facebook_page_id;
 
     /**
-     * @var InstagramService|null Singleton instance
-     */
-    private static ?InstagramService $instance = null;
-
-    /**
      * Instagram API base URL
      */
     private const API_BASE_URL = 'https://graph.facebook.com/v20.0';
@@ -45,34 +40,22 @@ class InstagramService extends SocialMediaService implements ShareInterface, Sha
     /**
      * Private constructor to prevent direct instantiation.
      */
-    private function __construct(
+    private function __construct() {
+    }
+
+    public function withCredentials(
         string $accessToken,
         string $instagramAccountId,
         string $facebookPageId
-    ) {
-        $this->access_token = $accessToken;
-        $this->instagram_account_id = $instagramAccountId;
-        $this->facebook_page_id = $facebookPageId;
+    ): static {
+        $clone = clone $this;
+        $clone->access_token = $accessToken;
+        $clone->instagram_account_id = $instagramAccountId;
+        $clone->facebook_page_id = $facebookPageId;
+
+        return $clone;
     }
 
-    /**
-     * Get the singleton instance of InstagramService.
-     */
-    public static function getInstance(): InstagramService
-    {
-        if (self::$instance === null) {
-            $accessToken = config('autopost.instagram_access_token');
-            $instagramAccountId = config('autopost.instagram_account_id');
-            $facebookPageId = config('autopost.facebook_page_id');
-
-            if (!$accessToken || !$instagramAccountId || !$facebookPageId) {
-                throw new SocialMediaException('Instagram credentials are not properly configured.');
-            }
-
-            self::$instance = new self($accessToken, $instagramAccountId, $facebookPageId);
-        }
-        return self::$instance;
-    }
 
     /**
      * Share a text post with a URL to Instagram (as a story or feed post).
@@ -86,7 +69,7 @@ class InstagramService extends SocialMediaService implements ShareInterface, Sha
     public function share(string $caption, string $url): array
     {
         $this->validateInput($caption, $url);
-        
+
         try {
             // Instagram doesn't support direct URL sharing in feed posts
             // We'll create a story with the URL
@@ -108,7 +91,7 @@ class InstagramService extends SocialMediaService implements ShareInterface, Sha
     public function shareImage(string $caption, string $image_url): array
     {
         $this->validateInput($caption, $image_url);
-        
+
         try {
             // Step 1: Create media container
             $containerUrl = $this->buildApiUrl($this->instagram_account_id . '/media');
@@ -148,7 +131,7 @@ class InstagramService extends SocialMediaService implements ShareInterface, Sha
     public function shareVideo(string $caption, string $video_url): array
     {
         $this->validateInput($caption, $video_url);
-        
+
         try {
             // Step 1: Create media container
             $containerUrl = $this->buildApiUrl($this->instagram_account_id . '/media');
@@ -189,7 +172,7 @@ class InstagramService extends SocialMediaService implements ShareInterface, Sha
     public function shareStory(string $caption, string $url): array
     {
         $this->validateInput($caption, $url);
-        
+
         try {
             // Create a story with text overlay
             $storyUrl = $this->buildApiUrl($this->instagram_account_id . '/media');
@@ -325,7 +308,7 @@ class InstagramService extends SocialMediaService implements ShareInterface, Sha
         // This is a simplified implementation
         // In a real scenario, you might want to use a service like Canva API or generate images programmatically
         $imageText = $text . "\n\n" . $url;
-        
+
         // For now, return a placeholder image URL
         // In production, you should generate an actual image with the text
         return 'https://via.placeholder.com/1080x1920/000000/FFFFFF?text=' . urlencode($imageText);

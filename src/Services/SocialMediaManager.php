@@ -109,14 +109,15 @@ class SocialMediaManager
      * @return mixed The platform service instance.
      * @throws SocialMediaException
      */
-    public function platform(string $platform)
+    public function platform(string $platform, array $credentials)
     {
         if (!isset(self::PLATFORMS[$platform])) {
             throw new SocialMediaException("Platform '{$platform}' is not supported.");
         }
 
         $serviceClass = self::PLATFORMS[$platform];
-        return $serviceClass::getInstance();
+        $creds = $credentials[$platform] ?? [];
+        return new $serviceClass($creds);
     }
 
     /**
@@ -191,7 +192,7 @@ class SocialMediaManager
      * @param array $parameters The method parameters.
      * @return array Results from all platforms.
      */
-    private function executeOnPlatforms(array $platforms, string $method, array $parameters): array
+    private function executeOnPlatforms(array $platforms, string $method, array $parameters, array $credentials): array
     {
         $results = [];
         $errors = [];
@@ -204,7 +205,8 @@ class SocialMediaManager
                 }
 
                 $serviceClass = self::PLATFORMS[$platform];
-                $service = $serviceClass::getInstance();
+                $creds = $credentials[$platform] ?? [];
+                $service = new $serviceClass($creds);
 
                 if (!method_exists($service, $method)) {
                     $errors[$platform] = "Method '{$method}' is not supported on platform '{$platform}'.";

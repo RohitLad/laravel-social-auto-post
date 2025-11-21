@@ -45,34 +45,22 @@ class TikTokService extends SocialMediaService implements ShareInterface, ShareI
     /**
      * Private constructor to prevent direct instantiation.
      */
-    private function __construct(
+    private function __construct() {
+    }
+
+    public function withCredentials(
         string $accessToken,
         string $clientKey,
         string $clientSecret
-    ) {
-        $this->access_token = $accessToken;
-        $this->client_key = $clientKey;
-        $this->client_secret = $clientSecret;
-    }
+    ): static
+{
+    $clone = clone $this;
+    $clone->access_token = $accessToken;
+    $clone->client_key = $clientKey;
+    $clone->client_secret = $clientSecret;
 
-    /**
-     * Get the singleton instance of TikTokService.
-     */
-    public static function getInstance(): TikTokService
-    {
-        if (self::$instance === null) {
-            $accessToken = config('autopost.tiktok_access_token');
-            $clientKey = config('autopost.tiktok_client_key');
-            $clientSecret = config('autopost.tiktok_client_secret');
-
-            if (!$accessToken || !$clientKey || !$clientSecret) {
-                throw new SocialMediaException('TikTok credentials are not properly configured.');
-            }
-
-            self::$instance = new self($accessToken, $clientKey, $clientSecret);
-        }
-        return self::$instance;
-    }
+    return $clone;
+}
 
     /**
      * Share a text post with a URL to TikTok.
