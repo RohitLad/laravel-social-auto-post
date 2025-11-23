@@ -16,9 +16,11 @@ use Illuminate\Support\ServiceProvider;
 class SocialShareServiceProvider extends ServiceProvider {
 
     public function boot() {
+        $config = __DIR__.'/config/autopost.php';
         $this->publishes([
-             __DIR__.'/config/autopost.php' => config_path('autopost.php'),
+             $config => config_path('autopost.php'),
         ], 'autopost');
+        $this->mergeConfigFrom( $config, 'autopost');
     }
 
     public function register() {
@@ -70,8 +72,6 @@ class SocialShareServiceProvider extends ServiceProvider {
         $this->app->alias(PinterestService::class, 'pinterest');
         $this->app->alias(SocialMediaManager::class, 'socialmedia');
 
-        // Register config file
-        $this->mergeConfigFrom( __DIR__.'/config/autopost.php', 'autopost');
     }
 
 }
