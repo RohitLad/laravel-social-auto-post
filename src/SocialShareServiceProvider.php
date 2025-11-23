@@ -19,7 +19,7 @@ class SocialShareServiceProvider extends ServiceProvider {
         $config = __DIR__.'/config/autopost.php';
         $this->publishes([
              $config => config_path('autopost.php'),
-        ], 'autopost');
+        ], ['autopost']);
         $this->mergeConfigFrom( $config, 'autopost');
     }
 
